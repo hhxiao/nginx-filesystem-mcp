@@ -1,0 +1,40 @@
+name: Release Docker Image
+
+on:
+  push:
+    tags:
+      - 'v*'  # Trigger on version tags like v1.0.0, v2.3.1, etc.
+
+env:
+  IMAGE_NAME: ghcr.io/hhxiao/nginx-filesystem-mcp
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write  # Required for pushing to GHCR
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract tag version
+        id: tag
+        run: echo "version=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+
+      - name: Build Docker image
+        run: |
+          docker build -t $IMAGE_NAME:${{ steps.tag.outputs.version }} .
+
+      - name: Push Docker image
+        run: |
+          docker push $IMAGE_NAME:${{ steps.tag.outputs.version }}
