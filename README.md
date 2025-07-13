@@ -14,9 +14,20 @@ from rest_mcp import MultiServerMCPClient
 
 client = MultiServerMCPClient(
     {
-        "content": {
+        "nginx-file": {
             "url": "http://0.0.0.0:9292/mcp",
-            "transport": "streamable_http"
+            "transport": "streamable_http",
+            "headers": {
+              "Authorization": os.getenv("TOKEN")
+            }
+        },
+        "nginx-file-2": {
+            "command": "nginx-filesystem-mcp",
+            "args": ["stdio"],
+            "transport": "stdio",
+            "env": {
+              "TOKEN": os.getenv("TOKEN")
+            }
         }
     }
 )
@@ -29,9 +40,20 @@ To configure the nginx-filesystem-mcp for use in VS Code:
 ```json
 {
   "servers": {
-    "content": {
+    "nginx-file": {
       "type": "http",
-      "url": "http://0.0.0.0:9292/mcp"
+      "url": "http://0.0.0.0:9292/mcp",
+      "headers": {
+        "Authorization": "<TOKEN>"
+      }
+    },
+    "nginx-file-2": {
+      "type": "stdio",
+      "command": "nginx-filesystem-mcp",
+      "args": ["stdio"],
+      "env": {
+        "TOKEN": "<TOKEN>"
+      }
     }
   }
 }
