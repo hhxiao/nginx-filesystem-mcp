@@ -1,0 +1,81 @@
+{
+  "protocolVersion": "2025-03-26",
+  "capabilities": {
+    "logging": {},
+    "resources": {
+      "subscribe": true,
+      "listChanged": true
+    },
+    "tools": {
+      "listChanged": true
+    }
+  },
+  "serverInfo": {
+    "name": "nginx filesystem mcp",
+    "version": "0.0.0"
+  },
+  "resourceTemplates": [
+    {
+      "uriTemplate": "files://{path}",
+      "name": "File",
+      "description": "Return path information for a folder or a file",
+      "mimeType": "application/json"
+    }
+  ],
+  "tools": [
+    {
+      "annotations": {
+        "title": "list a folder",
+        "readOnlyHint": true
+      },
+      "description": "list a folder",
+      "inputSchema": {
+        "properties": {
+          "path": {
+            "description": "path of the directory to list",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "name": "listFolder"
+    },
+    {
+      "annotations": {
+        "title": "read a file",
+        "readOnlyHint": true
+      },
+      "description": "read a file",
+      "inputSchema": {
+        "properties": {
+          "path": {
+            "description": "path to the file to read",
+            "type": "string"
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "type": "object"
+      },
+      "name": "readPFile"
+    },
+    {
+      "annotations": {
+        "title": "traverse a folder",
+        "readOnlyHint": true
+      },
+      "description": "Returns a hierarchical JSON representation of directory structure",
+      "inputSchema": {
+        "properties": {
+          "path": {
+            "description": "path of the directory to traverse",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "name": "treeFolder"
+    }
+  ]
+}
