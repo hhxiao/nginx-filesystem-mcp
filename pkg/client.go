@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"github.com/patrickmn/go-cache"
@@ -55,6 +56,12 @@ func (p *Client) GetContent(ctx context.Context, filepath string) (*Content, err
 
 	r := resty.New().EnableDebug().SetDebugLogFormatter(debugLogCustomFormatter)
 	defer r.Close()
+
+	if os.Getenv("INSECURE_SKIP_VERIFY") == "true" {
+		r.SetTLSClientConfig(&tls.Config{
+			InsecureSkipVerify: true,
+		})
+	}
 
 	filepath = strings.TrimPrefix(filepath, "/")
 	rawUrl := fmt.Sprintf("%s/%s", p.baseURL, filepath)
