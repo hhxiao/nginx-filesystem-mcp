@@ -1,15 +1,32 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"github.com/hhxiao/nginx-filesystem-mcp/pkg"
 	"github.com/joho/godotenv"
 	"github.com/mark3labs/mcp-go/server"
 	"log"
+	"net/http"
+	"os"
 )
 
 var version = "0.0.0"
+
+func contextFromEnv(ctx context.Context) context.Context {
+	if token := os.Getenv("TOKEN"); token != "" {
+		ctx = context.WithValue(ctx, "Authorization", token)
+	}
+	return ctx
+}
+
+func contextFromRequest(ctx context.Context, r *http.Request) context.Context {
+	if token := r.Header.Get("Authorization"); token != "" {
+		ctx = context.WithValue(ctx, "Authorization", token)
+	}
+	return ctx
+}
 
 func main() {
 	_ = godotenv.Load()
@@ -38,6 +55,7 @@ func main() {
 	case "sse":
 		sseServer := server.NewSSEServer(s,
 			server.WithBaseURL(fmt.Sprintf("http://0.0.0.0:%s", port)),
+			server.WithSSEContextFunc(contextFromRequest),
 		)
 		sseEndpoint, _ := sseServer.CompleteSseEndpoint()
 		log.Printf("nginx filesystem mcp server(%s) listening on %s 🚀", version, sseEndpoint)
@@ -47,6 +65,7 @@ func main() {
 	case "stream":
 		streamServer := server.NewStreamableHTTPServer(s,
 			server.WithStateLess(true),
+			server.WithHTTPContextFunc(contextFromRequest),
 		)
 		streamEndpoint := fmt.Sprintf("http://0.0.0.0:%s/mcp", port)
 		log.Printf("nginx filesystem mcp server(%s) listening on %s 🚀", version, streamEndpoint)
@@ -54,7 +73,7 @@ func main() {
 			log.Fatalf("nginx filesystem mcp server error: %v", err)
 		}
 	case "stdio":
-		if err := server.ServeStdio(s); err != nil {
+		if err := server.ServeStdio(s, server.WithStdioContextFunc(contextFromEnv)); err != nil {
 			log.Fatalf("nginx filesystem mcp server error: %v\n", err)
 		}
 	default:

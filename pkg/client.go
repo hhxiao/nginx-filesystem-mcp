@@ -60,18 +60,6 @@ func WithInsecureSkipVerify(insecureSkipVerify bool) Option {
 }
 
 func (p *Client) GetContent(ctx context.Context, filepath string) (*Content, error) {
-	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
-	defer cancel()
-
-	r := resty.New().EnableDebug().SetDebugLogFormatter(debugLogCustomFormatter)
-	defer r.Close()
-
-	if p.insecureSkipVerify {
-		r.SetTLSClientConfig(&tls.Config{
-			InsecureSkipVerify: true,
-		})
-	}
-
 	filepath = strings.TrimPrefix(filepath, "/")
 	rawUrl := fmt.Sprintf("%s/%s", p.baseURL, filepath)
 	u, _ := url.Parse(rawUrl)
@@ -84,6 +72,24 @@ func (p *Client) GetContent(ctx context.Context, filepath string) (*Content, err
 	if content, found := contentCache.Get(rawUrl); found {
 		return content.(*Content), nil
 	}
+
+	r := resty.New().EnableDebug().SetDebugLogFormatter(debugLogCustomFormatter)
+	defer r.Close()
+
+	if val := ctx.Value("Authorization"); val != nil {
+		if auth, ok := val.(string); ok {
+			r.SetHeader("Authorization", auth)
+		}
+	}
+	if p.insecureSkipVerify {
+		r.SetTLSClientConfig(&tls.Config{
+			InsecureSkipVerify: true,
+		})
+	}
+
+	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
+	defer cancel()
+
 	res, err := r.R().
 		SetContext(ctx).
 		Get(rawUrl)
