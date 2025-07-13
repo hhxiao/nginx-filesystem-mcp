@@ -1,4 +1,4 @@
-name: Release Docker Image
+name: Build nginx-filesystem-mcp image
 
 on:
   push:
@@ -38,6 +38,11 @@ jobs:
           mkdir -p ./bin
           go mod vendor
           go build -mod=vendor -ldflags="-X main.version=${{ steps.tag.outputs.version }}" -o ./bin/mcp .
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver: docker-container
 
       - name: Build and push multi-platform image
         uses: docker/build-push-action@v5
