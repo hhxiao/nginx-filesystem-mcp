@@ -35,12 +35,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
 
+      - name: Set short SHA
+        id: vars
+        run: echo "short_sha=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
       - name: Install dependencies
         run: go mod vendor
 
       - name: Build binary
         run: |
           mkdir -p ./bin
-          go build -mod=vendor -ldflags="-X main.version=${{ github.sha::0:7 }}" -o ./bin/mcp .
-
-      # Optional: skip tests and static analysis as per original
+          go build -mod=vendor -ldflags="-X main.version=${{ steps.vars.outputs.short_sha }}" -o ./bin/mcp .
