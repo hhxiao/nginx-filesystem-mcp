@@ -50,5 +50,7 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ghcr.io/hhxiao/nginx-filesystem-mcp:${{ steps.tag.outputs.version }}
+          tags: |
+            ghcr.io/hhxiao/nginx-filesystem-mcp:${{ steps.tag.outputs.version }}
+            ghcr.io/hhxiao/nginx-filesystem-mcp:latest
 
