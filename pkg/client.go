@@ -24,14 +24,16 @@ type Content struct {
 }
 
 type Client struct {
-	baseURL string
+	baseURL            string
+	insecureSkipVerify bool
 }
 
 type Option func(*Client)
 
 func NewClient(opts ...Option) *Client {
 	client := &Client{
-		baseURL: os.Getenv("CONTENT_BASEURL"),
+		baseURL:            os.Getenv("CONTENT_BASEURL"),
+		insecureSkipVerify: os.Getenv("INSECURE_SKIP_VERIFY") == "true",
 	}
 	for _, opt := range opts {
 		opt(client)
@@ -43,10 +45,17 @@ func NewClient(opts ...Option) *Client {
 	return client
 }
 
-// WithBaseURL sets the base URL for PubHub handler
+// WithBaseURL sets the base URL
 func WithBaseURL(baseURL string) Option {
 	return func(s *Client) {
 		s.baseURL = baseURL
+	}
+}
+
+// WithInsecureSkipVerify sets the insecureSkipVerify flag
+func WithInsecureSkipVerify(insecureSkipVerify bool) Option {
+	return func(s *Client) {
+		s.insecureSkipVerify = insecureSkipVerify
 	}
 }
 
@@ -57,7 +66,7 @@ func (p *Client) GetContent(ctx context.Context, filepath string) (*Content, err
 	r := resty.New().EnableDebug().SetDebugLogFormatter(debugLogCustomFormatter)
 	defer r.Close()
 
-	if os.Getenv("INSECURE_SKIP_VERIFY") == "true" {
+	if p.insecureSkipVerify {
 		r.SetTLSClientConfig(&tls.Config{
 			InsecureSkipVerify: true,
 		})
