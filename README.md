@@ -22,12 +22,16 @@ client = MultiServerMCPClient(
             }
         },
         "nginx-file-2": {
-            "command": "nginx-filesystem-mcp",
-            "args": ["stdio"],
-            "transport": "stdio",
-            "env": {
-              "TOKEN": os.getenv("TOKEN")
-            }
+            "command": "docker",
+            "args": ["run", "-i", "--rm",
+                "-e", "TOKEN=<nginx_token>",
+                "-e", "INSECURE_SKIP_VERIFY=true",
+                "-e", "CONTENT_BASEURL=<nginx_base_url>",
+                "ghcr.io/hhxiao/nginx-filesystem-mcp:latest",
+                "-t",
+                "stdio"
+            ],
+            "transport": "stdio"
         }
     }
 )
@@ -49,11 +53,15 @@ To configure the nginx-filesystem-mcp for use in VS Code:
     },
     "nginx-file-2": {
       "type": "stdio",
-      "command": "nginx-filesystem-mcp",
-      "args": ["stdio"],
-      "env": {
-        "TOKEN": "<TOKEN>"
-      }
+      "command": "docker",
+      "args": ["run", "-i", "--rm",
+          "-e", "INSECURE_SKIP_VERIFY=true",
+          "-e", "TOKEN=<nginx_token>",
+          "-e", "CONTENT_BASEURL=<nginx_base_url>",
+          "ghcr.io/hhxiao/nginx-filesystem-mcp:latest",
+          "-t",
+          "stdio"
+      ]
     }
   }
 }

@@ -31,10 +31,10 @@ func contextFromRequest(ctx context.Context, r *http.Request) context.Context {
 func main() {
 	_ = godotenv.Load()
 
-	transport := "stream"
+	transport := "http"
 	port := "9292"
 
-	flag.StringVar(&transport, "t", transport, "Transport type (stdio|sse|stream)")
+	flag.StringVar(&transport, "t", transport, "Transport type (stdio|sse|http)")
 	flag.StringVar(&port, "port", port, "Port for SSE/Streamable HTTP transport type")
 	flag.Parse()
 
@@ -62,7 +62,7 @@ func main() {
 		if err := sseServer.Start(":" + port); err != nil {
 			log.Fatalf("nginx filesystem mcp server error: %v", err)
 		}
-	case "stream":
+	case "stream", "http":
 		streamServer := server.NewStreamableHTTPServer(s,
 			server.WithStateLess(true),
 			server.WithHTTPContextFunc(contextFromRequest),
